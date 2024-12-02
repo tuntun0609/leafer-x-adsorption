@@ -1,0 +1,68 @@
+{
+  "name": "leafer-x-snap",
+  "version": "1.0.0",
+  "author": "tuntun0609 <tun.nozomi@gmail.com>",
+  "license": "MIT",
+  "main": "dist/index.esm.js",
+  "exports": {
+    "import": "./dist/index.esm.js",
+    "require": "./dist/index.cjs",
+    "types": "./types/index.d.ts"
+  },
+  "keywords": [
+    "leafer",
+    "snap"
+  ],
+  "types": "types/index.d.ts",
+  "files": [
+    "src",
+    "types",
+    "dev",
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tuntun0609/leafer-x-snap"
+  },
+  "homepage": "https://github.com/tuntun0609/leafer-x-snap",
+  "bugs": "https://github.com/tuntun0609/leafer-x-snap/issues",
+  "scripts": {
+    "start": "cross-env NODE_ENV=development rollup -c -w",
+    "build": "cross-env PLATFORM=all rollup -c",
+    "build:watch": "cross-env PLATFORM=all rollup -c -w",
+    "test": "vitest",
+    "prepublish": "pnpm build"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.4",
+    "@rollup/plugin-html": "^1.0.3",
+    "@rollup/plugin-multi-entry": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.2.1",
+    "@rollup/plugin-terser": "^0.4.3",
+    "@rollup/plugin-typescript": "^11.1.3",
+    "@typescript-eslint/eslint-plugin": "^5.54.1",
+    "@typescript-eslint/parser": "^5.54.1",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.49.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "jsdom": "^22.0.0",
+    "leafer-ui": "^1.0.10",
+    "prettier": "^3.3.3",
+    "rollup": "^3.29.2",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-dts": "^6.0.2",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-serve": "^2.0.2",
+    "rollup-plugin-string": "^3.0.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9",
+    "vitest": "^0.34.4"
+  },
+  "peerDependencies": {
+    "@leafer-in/editor": "^1.0.9",
+    "@leafer-ui/core": "^1.0.9",
+    "@leafer-ui/interface": "^1.0.9"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "leafer-x-snap-project",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Leafer X Snap Project",
+  "scripts": {
+    "dev": "pnpm package:build:watch & pnpm playground:dev",
+    "playground:dev": "pnpm --parallel --filter playground dev",
+    "playground:build": "pnpm package:build && pnpm --filter playground build",
+    "package:dev": "pnpm  --parallel --filter leafer-x-snap start",
+    "package:build": "pnpm --filter leafer-x-snap build",
+    "package:build:watch": "pnpm --filter leafer-x-snap build:watch",
+    "package:publish": "pnpm package:build && cd package && npm publish"
+  },
+  "keywords": [],
+  "author": "tuntun0609 <tun.nozomi@gmail.com>",
+  "license": "ISC",
+  "publishConfig": {
+    "directory": "package"
+  }
+}
