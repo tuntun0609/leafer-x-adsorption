@@ -24,10 +24,13 @@ type SnapConfig = {
 ```typescript
 import { Snap } from 'leafer-x-snap';
 
-const app = new Leafer();
+const app = new App({
+  view: window
+  editor: {}
+});
+
 const snap = new Snap(app, {
   snapSize: 5,
-  lineColor: '#FF0000'
 });
 
 // 启用吸附功能
