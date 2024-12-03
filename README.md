@@ -16,6 +16,7 @@ npm install leafer-x-snap
 type SnapConfig = {
   snapSize?: number;
   lineColor?: string;
+  showLine?: boolean;
 };
 ```
 
@@ -52,10 +53,11 @@ constructor(app: IApp, config?: SnapConfig)
 
 #### 配置项
 
-| 属性        | 类型   | 默认值    | 说明           |
-| ----------- | ------ | --------- | -------------- |
-| `snapSize`  | number | 5         | 吸附距离范围   |
-| `lineColor` | string | '#D2D4D7' | 吸附辅助线颜色 |
+| 属性        | 类型    | 默认值    | 说明           |
+| ----------- | ------- | --------- | -------------- |
+| `snapSize`  | number  | 5         | 吸附距离范围   |
+| `lineColor` | string  | '#D2D4D7' | 吸附辅助线颜色 |
+| `showLine`  | boolean | true      | 是否显示辅助线 |
 
 ### 实例方法
 
@@ -85,7 +87,6 @@ snap.destroy()
 // 创建带配置的实例
 const snap = new Snap(app, {
   snapSize: 10,
-  lineColor: '#FF0000'
 })
 
 // 启用吸附功能

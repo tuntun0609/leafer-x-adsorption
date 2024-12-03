@@ -10,7 +10,8 @@
     "package:dev": "pnpm  --parallel --filter leafer-x-snap start",
     "package:build": "pnpm --filter leafer-x-snap build",
     "package:build:watch": "pnpm --filter leafer-x-snap build:watch",
-    "package:publish": "pnpm package:build && cd package && npm publish"
+    "package:publish": "pnpm package:build && pnpm copyReadme && cd package && npm publish",
+    "copyReadme": "cp README.md package"
   },
   "keywords": [],
   "author": "tuntun0609 <tun.nozomi@gmail.com>",

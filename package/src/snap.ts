@@ -22,6 +22,7 @@ type BoundPoints = {
 type SnapConfig = {
   snapSize?: number
   lineColor?: string
+  showLine?: boolean
 }
 
 const DEFAULT_SNAP_SIZE = 10
@@ -31,11 +32,15 @@ export class Snap {
   private app: IApp
   // 吸附点
   private snapPoints: BoundPoints[] = []
+  private verticalLines: Line[] = []
+  private horizontalLines: Line[] = []
 
   // 吸附距离
   public snapSize: number = DEFAULT_SNAP_SIZE
   // 吸附线颜色
   public lineColor: string = DEFAULT_LINE_COLOR
+  // 是否显示吸附线
+  public showLine = true
 
   constructor(app: IApp, config?: SnapConfig) {
     if (!app.isApp) {
@@ -54,12 +59,16 @@ export class Snap {
 
     this.snapSize = config?.snapSize ?? this.snapSize
     this.lineColor = config?.lineColor ?? this.lineColor
+    this.showLine = config?.showLine ?? this.showLine
 
     this.handleMove = this.handleMove.bind(this)
     this.handleSelect = this.handleSelect.bind(this)
     this.clear = this.clear.bind(this)
   }
 
+  /**
+   * 判断两个值是否在吸附范围内
+   */
   private isInRange(value1: number, value2: number) {
     return (
       Math.abs(Math.round(value1) - Math.round(value2)) <=
@@ -67,21 +76,9 @@ export class Snap {
     )
   }
 
-  private clearLines(direction?: 'x' | 'y') {
-    let lines: Line[] = []
-    if (direction) {
-      lines = this.app.sky?.find(`.snap-line-${direction}`) as Line[]
-    } else {
-      lines = [
-        ...(this.app.sky?.find('.snap-line-x') as Line[]),
-        ...(this.app.sky?.find('.snap-line-y') as Line[]),
-      ]
-    }
-    lines?.forEach(line => {
-      line.destroy()
-    })
-  }
-
+  /**
+   * 处理移动事件
+   */
   private handleMove(event: EditorMoveEvent) {
     this.clearLines()
 
@@ -122,6 +119,9 @@ export class Snap {
       })
     })
 
+    /**
+     * 获取吸附信息
+     */
     const getSnapInfo = (snap: { offset: number; targetPoint: Point; snapPoint: Point }[]) => {
       if (snap.length === 0) {
         return null
@@ -141,6 +141,10 @@ export class Snap {
 
     if (snapYInfo) {
       target.y = target.y - snapYInfo.offset
+    }
+
+    if (!this.showLine) {
+      return
     }
 
     // 缩放有精度问题，所以需要使用 toFixed 来判断
@@ -165,14 +169,17 @@ export class Snap {
     this.drawLines(horizontalLines, 'x', this.lineColor)
   }
 
-  private drawLines(lines: number[][], direction: 'x' | 'y', color = this.lineColor) {
+  /**
+   * 绘制吸附线
+   */
+  private drawLines(linesPoint: number[][], direction: 'x' | 'y', color = this.lineColor) {
     // 根据绘制方向的坐标分类
     const pointSet = new Set<number>()
-    lines.forEach(line => {
+    linesPoint.forEach(line => {
       pointSet.add(direction === 'x' ? line[1] : line[0])
     })
     const linesSet = Array.from(pointSet).map(point =>
-      lines.filter(line => (direction === 'x' ? line[1] === point : line[0] === point))
+      linesPoint.filter(line => (direction === 'x' ? line[1] === point : line[0] === point))
     )
     const shouldDrawLines = linesSet.map(lines => {
       // 找出最两段的顶点
@@ -197,19 +204,41 @@ export class Snap {
       return [constantNum, minPoint, constantNum, maxPoint]
     })
 
-    shouldDrawLines.forEach(line => {
-      this.drawLine(line, direction, color)
+    const lines = this.getLines(shouldDrawLines.length, direction)
+    shouldDrawLines.forEach((line, index) => {
+      this.drawLine(lines[index], line, color)
     })
   }
 
-  private drawLine(linePoint: number[], direction: 'x' | 'y', color = '#000') {
-    const line = new Line({
-      stroke: color,
-      strokeWidth: 1,
-      className: `snap-line-${direction}`,
-      visible: true,
-      dashPattern: [5],
-    })
+  /**
+   * 获取吸附线实例，用于复用吸附线的实例
+   */
+  private getLines(number: number, direction: 'x' | 'y') {
+    const lines = direction === 'x' ? this.horizontalLines : this.verticalLines
+    const originLineNum = lines.length
+    if (number <= originLineNum) {
+      return lines.slice(0, number)
+    } else {
+      const newLines = new Array(number - originLineNum).fill(null).map(
+        () =>
+          new Line({
+            stroke: this.lineColor,
+            strokeWidth: 1,
+            className: `snap-line-${direction}`,
+            visible: false,
+            dashPattern: [5],
+          })
+      )
+      lines.push(...newLines)
+      this.app.sky?.add(newLines)
+      return [...lines, ...newLines]
+    }
+  }
+
+  /**
+   * 绘制单条吸附线
+   */
+  private drawLine(line: Line, linePoint: number[], color = this.lineColor) {
     const firstPoint = this.app.tree?.getWorldPoint({
       x: linePoint[0],
       y: linePoint[1],
@@ -221,10 +250,13 @@ export class Snap {
     line.set({
       points: [firstPoint.x, firstPoint.y, secondPoint.x, secondPoint.y],
       visible: true,
+      stroke: color,
     })
-    this.app.sky?.add(line)
   }
 
+  /**
+   * 处理选中事件
+   */
   private handleSelect(event: EditorEvent) {
     const { value } = event
     // 获取视口内所有的元素
@@ -239,7 +271,9 @@ export class Snap {
     this.snapPoints = elements.map(item => this.getSnapPoints(item))
   }
 
-  // 获取元素的吸附定位点
+  /**
+   * 获取元素的吸附定位点
+   */
   private getSnapPoints(_element: IUI | IUI[]): BoundPoints {
     let element: IUI[] = []
     if (Array.isArray(_element)) {
@@ -304,7 +338,9 @@ export class Snap {
     }
   }
 
-  // 获取视口内的元素
+  /**
+   * 获取视口内的元素
+   */
   private getElementsInViewport() {
     // 视口范围对应的内部坐标
     const zoomLayer = this.app.zoomLayer
@@ -339,10 +375,31 @@ export class Snap {
     return data ?? []
   }
 
+  /**
+   * 隐藏吸附线
+   */
+  private clearLines(direction?: 'x' | 'y') {
+    let lines: Line[] = []
+    if (direction) {
+      lines = direction === 'x' ? this.horizontalLines : this.verticalLines
+    } else {
+      lines = [...this.horizontalLines, ...this.verticalLines]
+    }
+    lines?.forEach(line => {
+      line.visible = false
+    })
+  }
+
+  /**
+   * 清除吸附线
+   */
   private clear() {
     this.clearLines()
   }
 
+  /**
+   * 启用吸附
+   */
   public enable(enable: boolean) {
     if (enable) {
       this.app.editor?.on(EditorEvent.SELECT, this.handleSelect)
@@ -357,18 +414,22 @@ export class Snap {
     }
   }
 
+  /**
+   * 销毁吸附
+   */
   public destroy() {
     this.app.editor?.off(EditorEvent.SELECT, this.handleSelect)
     this.app.editor?.off(EditorMoveEvent.MOVE, this.handleMove)
     this.app.off(PointerEvent.UP, this.clear)
     this.app.tree?.off(LayoutEvent.AFTER, this.clear)
-    const xLines = this.app.sky?.find('.snap-line-x') as Line[]
-    const yLines = this.app.sky?.find('.snap-line-y') as Line[]
-    xLines.forEach(line => {
+    this.clear
+    this.horizontalLines.forEach(line => {
       line.destroy()
     })
-    yLines.forEach(line => {
+    this.verticalLines.forEach(line => {
       line.destroy()
     })
+    this.horizontalLines = []
+    this.verticalLines = []
   }
 }

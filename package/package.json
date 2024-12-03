@@ -1,6 +1,6 @@
 {
   "name": "leafer-x-snap",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "tuntun0609 <tun.nozomi@gmail.com>",
   "license": "MIT",
   "main": "dist/index.esm.js",
