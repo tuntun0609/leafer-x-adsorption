@@ -23,6 +23,9 @@ type SnapConfig = {
   snapSize?: number
   lineColor?: string
   showLine?: boolean
+  strokeWidth?: number
+  dashPattern?: number[]
+  isDash?: boolean
 }
 
 const DEFAULT_SNAP_SIZE = 10
@@ -41,6 +44,12 @@ export class Snap {
   public lineColor: string = DEFAULT_LINE_COLOR
   // 是否显示吸附线
   public showLine = true
+  // 吸附线宽度
+  public strokeWidth = 1
+  // 是否虚线
+  public isDash = true
+  // 虚线样式
+  public dashPattern: number[] = [5]
 
   constructor(app: IApp, config?: SnapConfig) {
     if (!app.isApp) {
@@ -60,6 +69,9 @@ export class Snap {
     this.snapSize = config?.snapSize ?? this.snapSize
     this.lineColor = config?.lineColor ?? this.lineColor
     this.showLine = config?.showLine ?? this.showLine
+    this.strokeWidth = config?.strokeWidth ?? this.strokeWidth
+    this.isDash = config?.isDash ?? this.isDash
+    this.dashPattern = config?.dashPattern ?? this.dashPattern
 
     this.handleMove = this.handleMove.bind(this)
     this.handleSelect = this.handleSelect.bind(this)
@@ -223,10 +235,10 @@ export class Snap {
         () =>
           new Line({
             stroke: this.lineColor,
-            strokeWidth: 1,
+            strokeWidth: this.strokeWidth,
             className: `snap-line-${direction}`,
             visible: false,
-            dashPattern: [5],
+            dashPattern: this.isDash ? this.dashPattern : undefined,
           })
       )
       lines.push(...newLines)
@@ -251,6 +263,8 @@ export class Snap {
       points: [firstPoint.x, firstPoint.y, secondPoint.x, secondPoint.y],
       visible: true,
       stroke: color,
+      strokeWidth: this.strokeWidth,
+      dashPattern: this.isDash ? this.dashPattern : undefined,
     })
   }
 
@@ -406,6 +420,13 @@ export class Snap {
       this.app.editor?.on(EditorMoveEvent.MOVE, this.handleMove)
       this.app.on(PointerEvent.UP, this.clear)
       this.app.tree?.on(LayoutEvent.AFTER, this.clear)
+
+      const selectElements = this.app.editor?.list
+      if (selectElements.length > 0) {
+        this.handleSelect({
+          value: selectElements,
+        } as unknown as EditorEvent)
+      }
     } else {
       this.app.editor?.off(EditorEvent.SELECT, this.handleSelect)
       this.app.editor?.off(EditorMoveEvent.MOVE, this.handleMove)
@@ -422,7 +443,7 @@ export class Snap {
     this.app.editor?.off(EditorMoveEvent.MOVE, this.handleMove)
     this.app.off(PointerEvent.UP, this.clear)
     this.app.tree?.off(LayoutEvent.AFTER, this.clear)
-    this.clear
+    this.clear()
     this.horizontalLines.forEach(line => {
       line.destroy()
     })

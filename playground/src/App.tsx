@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { App as LeaferApp, Line, Rect } from 'leafer-editor'
 import { Snap } from 'leafer-x-snap'
 import { DotMatrix } from 'leafer-x-dot-matrix'
-import { Button, ColorPicker, InputNumber } from 'antd'
+import { Button, ColorPicker, InputNumber, Switch } from 'antd'
 import { GithubOutlined } from '@ant-design/icons'
 
 import styles from './App.module.css'
@@ -15,6 +15,7 @@ const App = () => {
   const [enabled, setEnabled] = useState(false)
   const [snapLineColor, setSnapLineColor] = useState('#D2D4D7')
   const [snapSize, setSnapSize] = useState(10)
+  const [isDash, setIsDash] = useState(false)
 
   useEffect(() => {
     if (!canvasContainerRef.current) {
@@ -60,7 +61,7 @@ const App = () => {
 
     setSnapLineColor(snap.lineColor)
     setSnapSize(snap.snapSize)
-
+    setIsDash(snap.isDash)
     return () => {
       app.destroy()
     }
@@ -103,6 +104,16 @@ const App = () => {
             if (snapRef.current && value) {
               snapRef.current.snapSize = value
               setSnapSize(value)
+            }
+          }}
+        />
+        <span style={{ marginLeft: 8 }}>是否为虚线:</span>
+        <Switch
+          checked={isDash}
+          onChange={value => {
+            if (snapRef.current) {
+              snapRef.current.isDash = value
+              setIsDash(value)
             }
           }}
         />

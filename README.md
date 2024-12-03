@@ -17,6 +17,9 @@ type SnapConfig = {
   snapSize?: number;
   lineColor?: string;
   showLine?: boolean;
+  strokeWidth?: number;
+  dashPattern?: number[];
+  isDash?: boolean;
 };
 ```
 
@@ -26,12 +29,13 @@ type SnapConfig = {
 import { Snap } from 'leafer-x-snap';
 
 const app = new App({
-  view: window
+  view: window,
   editor: {}
 });
 
 const snap = new Snap(app, {
   snapSize: 5,
+  strokeWidth: 2,
 });
 
 // 启用吸附功能
@@ -53,11 +57,14 @@ constructor(app: IApp, config?: SnapConfig)
 
 #### 配置项
 
-| 属性        | 类型    | 默认值    | 说明           |
-| ----------- | ------- | --------- | -------------- |
-| `snapSize`  | number  | 5         | 吸附距离范围   |
-| `lineColor` | string  | '#D2D4D7' | 吸附辅助线颜色 |
-| `showLine`  | boolean | true      | 是否显示辅助线 |
+| 属性          | 类型     | 默认值    | 说明           |
+| ------------- | -------- | --------- | -------------- |
+| `snapSize`    | number   | 5         | 吸附距离范围   |
+| `lineColor`   | string   | '#D2D4D7' | 吸附辅助线颜色 |
+| `showLine`    | boolean  | true      | 是否显示辅助线 |
+| `strokeWidth` | number   | 1         | 线宽           |
+| `dashPattern` | number[] | []        | 虚线样式       |
+| `isDash`      | boolean  | false     | 是否使用虚线   |
 
 ### 实例方法
 
