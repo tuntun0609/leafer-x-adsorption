@@ -20,6 +20,7 @@ type SnapConfig = {
   strokeWidth?: number;
   dashPattern?: number[];
   isDash?: boolean;
+  showLinePoints?: boolean;
 };
 ```
 
@@ -57,14 +58,15 @@ constructor(app: IApp, config?: SnapConfig)
 
 #### 配置项
 
-| 属性          | 类型     | 默认值    | 说明           |
-| ------------- | -------- | --------- | -------------- |
-| `snapSize`    | number   | 5         | 吸附距离范围   |
-| `lineColor`   | string   | '#D2D4D7' | 吸附辅助线颜色 |
-| `showLine`    | boolean  | true      | 是否显示辅助线 |
-| `strokeWidth` | number   | 1         | 线宽           |
-| `dashPattern` | number[] | []        | 虚线样式       |
-| `isDash`      | boolean  | false     | 是否使用虚线   |
+| 属性             | 类型     | 默认值    | 说明               |
+| ---------------- | -------- | --------- | ------------------ |
+| `snapSize`       | number   | 5         | 吸附距离范围       |
+| `lineColor`      | string   | '#D2D4D7' | 吸附辅助线颜色     |
+| `showLine`       | boolean  | true      | 是否显示辅助线     |
+| `strokeWidth`    | number   | 1         | 线宽               |
+| `dashPattern`    | number[] | [5]       | 虚线样式           |
+| `isDash`         | boolean  | true      | 是否使用虚线       |
+| `showLinePoints` | boolean  | true      | 是否显示辅助线端点 |
 
 ### 实例方法
 

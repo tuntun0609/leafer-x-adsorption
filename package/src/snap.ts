@@ -1,4 +1,4 @@
-import { Line, PointerEvent, LayoutEvent } from '@leafer-ui/core'
+import { Line, PointerEvent, LayoutEvent, Group } from '@leafer-ui/core'
 
 import { IApp, IUI } from '@leafer-ui/interface'
 
@@ -26,6 +26,7 @@ type SnapConfig = {
   strokeWidth?: number
   dashPattern?: number[]
   isDash?: boolean
+  showLinePoints?: boolean
 }
 
 const DEFAULT_SNAP_SIZE = 10
@@ -37,6 +38,7 @@ export class Snap {
   private snapPoints: BoundPoints[] = []
   private verticalLines: Line[] = []
   private horizontalLines: Line[] = []
+  private linePoints: Group[] = []
 
   // 吸附距离
   public snapSize: number = DEFAULT_SNAP_SIZE
@@ -50,6 +52,8 @@ export class Snap {
   public isDash = true
   // 虚线样式
   public dashPattern: number[] = [5]
+  // 是否显示吸附点
+  public showLinePoints = true
 
   constructor(app: IApp, config?: SnapConfig) {
     if (!app.isApp) {
@@ -72,6 +76,7 @@ export class Snap {
     this.strokeWidth = config?.strokeWidth ?? this.strokeWidth
     this.isDash = config?.isDash ?? this.isDash
     this.dashPattern = config?.dashPattern ?? this.dashPattern
+    this.showLinePoints = config?.showLinePoints ?? this.showLinePoints
 
     this.handleMove = this.handleMove.bind(this)
     this.handleSelect = this.handleSelect.bind(this)
@@ -193,12 +198,14 @@ export class Snap {
     const linesSet = Array.from(pointSet).map(point =>
       linesPoint.filter(line => (direction === 'x' ? line[1] === point : line[0] === point))
     )
+    const points: number[][] = []
     const shouldDrawLines = linesSet.map(lines => {
       // 找出最两段的顶点
       let minPoint = Infinity
       let maxPoint = -Infinity
 
       lines.forEach(line => {
+        points.push([line[0], line[1]], [line[2], line[3]])
         if (direction === 'x') {
           minPoint = Math.min(minPoint, line[0], line[2])
           maxPoint = Math.max(maxPoint, line[0], line[2])
@@ -216,9 +223,75 @@ export class Snap {
       return [constantNum, minPoint, constantNum, maxPoint]
     })
 
+    if (this.showLinePoints) {
+      this.drawPoints(points)
+    }
+
     const lines = this.getLines(shouldDrawLines.length, direction)
     shouldDrawLines.forEach((line, index) => {
       this.drawLine(lines[index], line, color)
+    })
+  }
+
+  /**
+   * 获取吸附线上的点实例，用于复用实例
+   */
+  private getLinePoints(points: number[][]) {
+    const originLinePointsNum = this.linePoints.length
+    if (points.length <= originLinePointsNum) {
+      return this.linePoints.slice(0, points.length)
+    }
+
+    const newLinePoints = new Array(points.length - originLinePointsNum).fill(null).map(() => {
+      const line1 = new Line({
+        stroke: this.lineColor,
+        strokeWidth: this.strokeWidth,
+        points: [0, 0, 6, 6],
+        className: 'point-line',
+      })
+      const line2 = new Line({
+        stroke: this.lineColor,
+        strokeWidth: this.strokeWidth,
+        points: [0, 6, 6, 0],
+        className: 'point-line',
+      })
+      const points = new Group({
+        className: 'linePoint',
+        children: [line1, line2],
+        around: 'center',
+        visible: false,
+      })
+      return points
+    })
+
+    this.linePoints.push(...newLinePoints)
+    this.app.sky?.add(newLinePoints)
+    return [...this.linePoints, ...newLinePoints]
+  }
+
+  /**
+   * 绘制吸附线上的点
+   */
+  private drawPoints(points: number[][]) {
+    const linePoints = this.getLinePoints(points)
+
+    points.forEach((point, index) => {
+      const worldPoint = this.app.tree?.getWorldPoint({
+        x: point[0],
+        y: point[1],
+      })
+
+      const points = linePoints[index]
+
+      points.set({
+        visible: true,
+        x: worldPoint.x,
+        y: worldPoint.y,
+      })
+      points.children.forEach(item => {
+        item.stroke = this.lineColor
+      })
+      this.app.sky?.add(points)
     })
   }
 
@@ -367,8 +440,8 @@ export class Snap {
     ]
 
     const data = this.app.tree?.find(item => {
-      // 去除 Leafer 元素
-      if (item.isLeafer) {
+      // 去除 Leafer 元素和 SimulateElement 元素
+      if (item.isLeafer || item.tag === 'SimulateElement') {
         return 0
       }
 
@@ -405,10 +478,22 @@ export class Snap {
   }
 
   /**
+   * 清除吸附线上的点
+   */
+  private clearPoints() {
+    this.linePoints.forEach(item => {
+      item.visible = false
+    })
+  }
+
+  /**
    * 清除吸附线
    */
   private clear() {
     this.clearLines()
+    if (this.showLinePoints) {
+      this.clearPoints()
+    }
   }
 
   /**
@@ -450,6 +535,10 @@ export class Snap {
     this.verticalLines.forEach(line => {
       line.destroy()
     })
+    this.linePoints.forEach(item => {
+      item.destroy()
+    })
+    this.linePoints = []
     this.horizontalLines = []
     this.verticalLines = []
   }

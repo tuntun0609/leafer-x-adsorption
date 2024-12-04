@@ -16,6 +16,7 @@ const App = () => {
   const [snapLineColor, setSnapLineColor] = useState('#D2D4D7')
   const [snapSize, setSnapSize] = useState(10)
   const [isDash, setIsDash] = useState(false)
+  const [showLinePoints, setShowLinePoints] = useState(false)
 
   useEffect(() => {
     if (!canvasContainerRef.current) {
@@ -54,7 +55,7 @@ const App = () => {
     dotMatrixRef.current = dotMatrix
     dotMatrix.enableDotMatrix(true)
 
-    const snap = new Snap(app)
+    const snap = new Snap(app, {})
     snapRef.current = snap
     snap.enable(true)
     setEnabled(true)
@@ -62,6 +63,7 @@ const App = () => {
     setSnapLineColor(snap.lineColor)
     setSnapSize(snap.snapSize)
     setIsDash(snap.isDash)
+    setShowLinePoints(snap.showLinePoints)
     return () => {
       app.destroy()
     }
@@ -114,6 +116,16 @@ const App = () => {
             if (snapRef.current) {
               snapRef.current.isDash = value
               setIsDash(value)
+            }
+          }}
+        />
+        <span style={{ marginLeft: 8 }}>展示吸附点:</span>
+        <Switch
+          checked={showLinePoints}
+          onChange={value => {
+            if (snapRef.current) {
+              snapRef.current.showLinePoints = value
+              setShowLinePoints(value)
             }
           }}
         />
