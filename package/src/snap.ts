@@ -1,6 +1,7 @@
 import { Line, PointerEvent, LayoutEvent, Group } from '@leafer-ui/core'
 
 import { IApp, IUI } from '@leafer-ui/interface'
+import { ISimulateElement } from '@leafer-in/interface'
 
 import { EditorEvent, EditorMoveEvent } from '@leafer-in/editor'
 
@@ -153,11 +154,31 @@ export class Snap {
     const snapYInfo = getSnapInfo(snapY)
     //  x 方向可吸附
     if (snapXInfo) {
-      target.x = target.x - snapXInfo.offset
+      if (this.app.editor.multiple) {
+        // 多选情况下不可以只改变 target 的 x 值，需要改变所有选中元素的 x 值
+        this.app.editor.list.forEach(item => {
+          item.x = item.x - snapXInfo.offset
+        })
+        ;(target as ISimulateElement).safeChange(() => {
+          target.x = target.x - snapXInfo.offset
+        })
+      } else {
+        target.x = target.x - snapXInfo.offset
+      }
     }
 
     if (snapYInfo) {
-      target.y = target.y - snapYInfo.offset
+      if (this.app.editor.multiple) {
+        // 多选情况下不可以只改变 target 的 y 值，需要改变所有选中元素的 y 值
+        this.app.editor.list.forEach(item => {
+          item.y = item.y - snapYInfo.offset
+        })
+        ;(target as ISimulateElement).safeChange(() => {
+          target.y = target.y - snapYInfo.offset
+        })
+      } else {
+        target.y = target.y - snapYInfo.offset
+      }
     }
 
     if (!this.showLine) {

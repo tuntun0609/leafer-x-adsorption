@@ -21,6 +21,9 @@ importers:
         specifier: ^1.0.9
         version: 1.0.10
     devDependencies:
+      '@leafer-in/interface':
+        specifier: ^1.0.10
+        version: 1.0.10(@leafer-ui/interface@1.0.10)(@leafer/interface@1.0.10)
       '@rollup/plugin-commonjs':
         specifier: ^25.0.4
         version: 25.0.8(rollup@3.29.5)

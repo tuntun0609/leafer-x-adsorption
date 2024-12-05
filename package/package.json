@@ -1,6 +1,6 @@
 {
   "name": "leafer-x-snap",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "tuntun0609 <tun.nozomi@gmail.com>",
   "license": "MIT",
   "main": "dist/index.esm.js",
@@ -62,6 +62,7 @@
   },
   "peerDependencies": {
     "@leafer-in/editor": "^1.0.9",
+    "@leafer-in/interface": "^1.0.9",
     "@leafer-ui/core": "^1.0.9",
     "@leafer-ui/interface": "^1.0.9"
   }
