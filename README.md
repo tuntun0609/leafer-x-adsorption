@@ -5,6 +5,8 @@
 [![npm version](https://img.shields.io/npm/v/leafer-x-snap)](https://www.npmjs.com/package/leafer-x-snap)
 [![npm downloads](https://img.shields.io/npm/dm/leafer-x-snap)](https://www.npmjs.com/package/leafer-x-snap)
 
+<a href="https://afdian.com/a/tun-tun"><img width="100" src="https://pic1.afdiancdn.com/static/img/welcome/button-sponsorme.png" alt="sponsor"></a>
+
 <img src="https://github.com/tuntun0609/leafer-x-snap/blob/master/images/demo.png?raw=true" alt="demo" style="zoom:33%;" />
 
 ## 安装

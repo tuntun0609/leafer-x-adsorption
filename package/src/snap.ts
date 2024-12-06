@@ -49,7 +49,8 @@ export class Snap {
   private snapPoints: BoundPoints[] = []
   private verticalLines: Line[] = []
   private horizontalLines: Line[] = []
-  private linePoints: Group[] = []
+  private verticalLinePoints: Group[] = []
+  private horizontalLinePoints: Group[] = []
 
   // 吸附距离
   public snapSize: number = DEFAULT_SNAP_SIZE
@@ -265,7 +266,7 @@ export class Snap {
     })
 
     if (this.showLinePoints) {
-      this.drawPoints(points)
+      this.drawPoints(points, direction)
     }
 
     const lines = this.getLines(shouldDrawLines.length, direction)
@@ -277,10 +278,11 @@ export class Snap {
   /**
    * 获取吸附线上的点实例，用于复用实例
    */
-  private getLinePoints(points: number[][]) {
-    const originLinePointsNum = this.linePoints.length
+  private getLinePoints(points: number[][], direction: 'x' | 'y') {
+    const linePoints = direction === 'x' ? this.horizontalLinePoints : this.verticalLinePoints
+    const originLinePointsNum = linePoints.length
     if (points.length <= originLinePointsNum) {
-      return this.linePoints.slice(0, points.length)
+      return linePoints.slice(0, points.length)
     }
 
     const newLinePoints = new Array(points.length - originLinePointsNum).fill(null).map(() => {
@@ -305,16 +307,16 @@ export class Snap {
       return points
     })
 
-    this.linePoints.push(...newLinePoints)
+    linePoints.push(...newLinePoints)
     this.app.sky?.add(newLinePoints)
-    return [...this.linePoints, ...newLinePoints]
+    return [...linePoints, ...newLinePoints]
   }
 
   /**
    * 绘制吸附线上的点
    */
-  private drawPoints(points: number[][]) {
-    const linePoints = this.getLinePoints(points)
+  private drawPoints(points: number[][], direction: 'x' | 'y') {
+    const linePoints = this.getLinePoints(points, direction)
 
     points.forEach((point, index) => {
       const worldPoint = this.app.tree?.getWorldPoint({
@@ -533,8 +535,18 @@ export class Snap {
   /**
    * 清除吸附线上的点
    */
-  private clearPoints() {
-    this.linePoints.forEach(item => {
+  private clearPoints(direction?: 'x' | 'y') {
+    if (!direction) {
+      this.horizontalLinePoints.forEach(item => {
+        item.visible = false
+      })
+      this.verticalLinePoints.forEach(item => {
+        item.visible = false
+      })
+      return
+    }
+    const linePoints = direction === 'x' ? this.horizontalLinePoints : this.verticalLinePoints
+    linePoints.forEach(item => {
       item.visible = false
     })
   }
@@ -588,10 +600,14 @@ export class Snap {
     this.verticalLines.forEach(line => {
       line.destroy()
     })
-    this.linePoints.forEach(item => {
+    this.verticalLinePoints.forEach(item => {
       item.destroy()
     })
-    this.linePoints = []
+    this.horizontalLinePoints.forEach(item => {
+      item.destroy()
+    })
+    this.verticalLinePoints = []
+    this.horizontalLinePoints = []
     this.horizontalLines = []
     this.verticalLines = []
   }
