@@ -1,4 +1,4 @@
-import { Line, PointerEvent, LayoutEvent, Group } from '@leafer-ui/core'
+import { Line, PointerEvent, LayoutEvent, Group, UI, dataType } from '@leafer-ui/core'
 
 import { IApp, IUI } from '@leafer-ui/interface'
 import { ISimulateElement } from '@leafer-in/interface'
@@ -6,6 +6,15 @@ import { ISimulateElement } from '@leafer-in/interface'
 import { EditorEvent, EditorMoveEvent } from '@leafer-in/editor'
 
 const isArray = Array.isArray
+
+// 是否被当做吸附对象
+UI.addAttr('isSnap', true, dataType)
+
+declare module '@leafer-ui/interface' {
+  interface ILeafAttrData {
+    isSnap?: boolean
+  }
+}
 
 type Point = {
   x: number
@@ -28,6 +37,7 @@ type SnapConfig = {
   dashPattern?: number[]
   isDash?: boolean
   showLinePoints?: boolean
+  filter?: (element: IUI) => boolean
 }
 
 const DEFAULT_SNAP_SIZE = 10
@@ -55,6 +65,8 @@ export class Snap {
   public dashPattern: number[] = [5]
   // 是否显示吸附点
   public showLinePoints = true
+  // 自定义筛选吸附元素规则
+  public filter?: (element: IUI) => boolean
 
   constructor(app: IApp, config?: SnapConfig) {
     if (!app.isApp) {
@@ -78,10 +90,18 @@ export class Snap {
     this.isDash = config?.isDash ?? this.isDash
     this.dashPattern = config?.dashPattern ?? this.dashPattern
     this.showLinePoints = config?.showLinePoints ?? this.showLinePoints
+    this.filter = config?.filter ?? this.filter
 
     this.handleMove = this.handleMove.bind(this)
     this.handleSelect = this.handleSelect.bind(this)
     this.clear = this.clear.bind(this)
+  }
+
+  /**
+   * 主动改变筛选吸附元素函数
+   */
+  public changeFilter(filter: (element: IUI) => boolean) {
+    this.filter = filter
   }
 
   /**
@@ -369,11 +389,23 @@ export class Snap {
     const { value } = event
     // 获取视口内所有的元素
     const elements = this.getElementsInViewport().filter(item => {
-      // 筛出选中的元素
+      // 如果是单选 筛出自身
+      if (item === value) {
+        return false
+      }
+      // 如果是多选 筛出选中的元素
       if (isArray(value)) {
         return !value.includes(item)
       }
-      return item !== value
+      // 筛出不开启吸附的元素
+      if (!item.isSnap) {
+        return false
+      }
+      // 筛出自定义规则的元素
+      if (this.filter) {
+        return this.filter(item)
+      }
+      return true
     })
 
     this.snapPoints = elements.map(item => this.getSnapPoints(item))

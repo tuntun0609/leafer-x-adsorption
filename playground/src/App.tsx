@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { App as LeaferApp, Line, Rect } from 'leafer-editor'
+import { App as LeaferApp, Line, Rect, Text } from 'leafer-editor'
 import { Snap } from 'leafer-x-snap'
 import { DotMatrix } from 'leafer-x-dot-matrix'
 import { Button, ColorPicker, InputNumber, Switch } from 'antd'
@@ -48,6 +48,16 @@ const App = () => {
         strokeWidth: 4,
         points: [400, 200, 450, 500],
         editable: true,
+      })
+    )
+    app.tree.add(
+      Text.one({
+        text: '我设置为不可被吸附',
+        fontSize: 20,
+        editable: true,
+        x: 600,
+        y: 50,
+        isSnap: false,
       })
     )
 

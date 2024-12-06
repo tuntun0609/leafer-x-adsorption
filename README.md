@@ -2,6 +2,9 @@
 
 吸附插件，为 Leafer 应用提供元素自动吸附功能。
 
+[![npm version](https://img.shields.io/npm/v/leafer-x-snap)](https://www.npmjs.com/package/leafer-x-snap)
+[![npm downloads](https://img.shields.io/npm/dm/leafer-x-snap)](https://www.npmjs.com/package/leafer-x-snap)
+
 <img src="https://github.com/tuntun0609/leafer-x-snap/blob/master/images/demo.png?raw=true" alt="demo" style="zoom:33%;" />
 
 ## 安装
@@ -21,6 +24,7 @@ type SnapConfig = {
   dashPattern?: number[];
   isDash?: boolean;
   showLinePoints?: boolean;
+  filter?: (element: IUI) => boolean;
 };
 ```
 
@@ -43,6 +47,14 @@ const snap = new Snap(app, {
 snap.enable(true);
 ```
 
+可以在元素上设置 `isSnap` 属性来控制元素是否参与吸附计算，默认为 `true`
+
+```typescript
+new Rect({ isSnap: false });
+// or
+rect.isSnap = false;
+```
+
 ## API 文档
 
 ### 构造函数
@@ -58,15 +70,16 @@ constructor(app: IApp, config?: SnapConfig)
 
 #### 配置项
 
-| 属性             | 类型     | 默认值    | 说明               |
-| ---------------- | -------- | --------- | ------------------ |
-| `snapSize`       | number   | 5         | 吸附距离范围       |
-| `lineColor`      | string   | '#D2D4D7' | 吸附辅助线颜色     |
-| `showLine`       | boolean  | true      | 是否显示辅助线     |
-| `strokeWidth`    | number   | 1         | 线宽               |
-| `dashPattern`    | number[] | [5]       | 虚线样式           |
-| `isDash`         | boolean  | true      | 是否使用虚线       |
-| `showLinePoints` | boolean  | true      | 是否显示辅助线端点 |
+| 属性             | 类型                      | 默认值    | 说明                       |
+| ---------------- | ------------------------- | --------- | -------------------------- |
+| `snapSize`       | number                    | 5         | 吸附距离范围               |
+| `lineColor`      | string                    | '#D2D4D7' | 吸附辅助线颜色             |
+| `showLine`       | boolean                   | true      | 是否显示辅助线             |
+| `strokeWidth`    | number                    | 1         | 线宽                       |
+| `dashPattern`    | number[]                  | [5]       | 虚线样式                   |
+| `isDash`         | boolean                   | true      | 是否使用虚线               |
+| `showLinePoints` | boolean                   | true      | 是否显示辅助线端点         |
+| `filter`         | (element: IUI) => boolean | undefined | 过滤需要参与吸附计算的元素 |
 
 ### 实例方法
 
@@ -88,6 +101,15 @@ snap.enable(false)
 
 ```typescript
 snap.destroy()
+```
+
+#### changeFilter(filter: (element: IUI) => boolean)
+
+更改元素过滤器函数
+
+```typescript
+// 示例：只对矩形元素进行吸附
+snap.changeFilter((element) => element.tag === 'Rect')
 ```
 
 ## 使用示例
