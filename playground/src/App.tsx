@@ -12,6 +12,7 @@ const App = () => {
   const canvasContainerRef = useRef<HTMLDivElement>(null)
   const snapRef = useRef<Snap | null>(null)
   const dotMatrixRef = useRef<DotMatrix | null>(null)
+  const [app, setApp] = useState<LeaferApp | null>(null)
   const [enabled, setEnabled] = useState(false)
   const [snapLineColor, setSnapLineColor] = useState('#D2D4D7')
   const [snapSize, setSnapSize] = useState(10)
@@ -69,7 +70,7 @@ const App = () => {
     snapRef.current = snap
     snap.enable(true)
     setEnabled(true)
-
+    setApp(app)
     setSnapLineColor(snap.lineColor)
     setSnapSize(snap.snapSize)
     setIsDash(snap.isDash)
@@ -139,6 +140,20 @@ const App = () => {
             }
           }}
         />
+        <Button
+          onClick={() => {
+            app?.editor.group()
+          }}
+        >
+          group
+        </Button>
+        <Button
+          onClick={() => {
+            app?.editor.ungroup()
+          }}
+        >
+          ungroup
+        </Button>
         <div className={styles.githubIcon}>
           <Button
             style={{ padding: 0, width: 32, height: 32 }}

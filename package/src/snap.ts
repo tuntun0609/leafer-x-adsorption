@@ -388,16 +388,21 @@ export class Snap {
    * 处理选中事件
    */
   private handleSelect(event: EditorEvent) {
-    const { value } = event
+    const { value: selectElements } = event
     // 获取视口内所有的元素
     const elements = this.getElementsInViewport().filter(item => {
       // 如果是单选 筛出自身
-      if (item === value) {
+      if (item === selectElements) {
         return false
       }
       // 如果是多选 筛出选中的元素
-      if (isArray(value)) {
-        return !value.includes(item)
+      if (isArray(selectElements)) {
+        if (
+          selectElements.includes(item) ||
+          selectElements.some(el => item.children?.includes(el))
+        ) {
+          return false
+        }
       }
       // 筛出不开启吸附的元素
       if (!item.isSnap) {
@@ -494,10 +499,10 @@ export class Snap {
       -zoomLayer.y + zoomLayer.height / zoomLayer.scaleY,
     ]
 
-    const data = this.app.tree?.find(item => {
+    const data: IUI[] = this.app.tree?.children?.filter(item => {
       // 去除 Leafer 元素和 SimulateElement 元素
       if (item.isLeafer || item.tag === 'SimulateElement') {
-        return 0
+        return false
       }
 
       const itemBounds = item.getLayoutBounds('box', this.app.tree)
@@ -508,10 +513,10 @@ export class Snap {
         itemBounds.x + itemBounds.width < viewportBounds[0] ||
         itemBounds.y + itemBounds.height < viewportBounds[1]
       ) {
-        return 0
+        return false
       }
 
-      return 1
+      return true
     })
 
     return data ?? []
